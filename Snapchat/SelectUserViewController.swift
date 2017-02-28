@@ -9,10 +9,10 @@
 import UIKit
 import Firebase
 
-class SelectUserViewController: UIViewController, UITableViewDelegate, UITableViewDataSource
-    //UISearchResultsUpdating
+class SelectUserViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating
 {
     var userEmails : [String] = []
+    var filteredUserEmails  = [String]()
     var users : [User] = []
     
     var imageURL = ""
@@ -22,28 +22,29 @@ class SelectUserViewController: UIViewController, UITableViewDelegate, UITableVi
     var searchController : UISearchController!
     var resultsConroller = UITableViewController()
     
-    //    @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var tableView: UITableView!
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.tableView.dataSource = self
-        self.tableView.delegate = self
+//        self.tableView.dataSource = self
+//        self.tableView.delegate = self
+        self.resultsConroller.tableView.dataSource = self
+        self.resultsConroller.tableView.dataSource = self
         
         self.searchController = UISearchController(searchResultsController: self.resultsConroller)
         self.tableView.tableHeaderView = self.searchController.searchBar
-        //       self.searchController.searchResultsUpdater = self
+        self.searchController.searchResultsUpdater = self
         
         //  createSearchBar()
         
         FIRDatabase.database().reference().child("users").observe(FIRDataEventType.childAdded, with: { (snapshot) in
             let user = User()
             user.email = (snapshot.value as! NSDictionary)["email"] as! String
-            print("email: -> \(user.email)")
+
             user.uid = snapshot.key
             self.userEmails.append(user.email)
             self.users.append(user)
-            print("appended")
+
             self.tableView.reloadData()
             
             
@@ -51,26 +52,40 @@ class SelectUserViewController: UIViewController, UITableViewDelegate, UITableVi
         
     }
     
-    //    func updateSearchResults(for searchController: UISearchController) {
-    //        // Filter through
-    //        self.users.filter { (User:String) -> Bool in
-    //            return true
-    //        }
-    //
-    //        //update results tableview
-    //
-    //
-    //    }
+        func updateSearchResults(for searchController: UISearchController) {
+            // Filter through
+            self.filteredUserEmails.filter { (emails:String) -> Bool in
+                if emails.lowercased().contains(self.searchController.searchBar.text!.lowercased()) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+    
+            //update results tableview
+            self.resultsConroller.tableView.reloadData()
+    
+    
+        }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return users.count
+        if tableView == self.tableView {
+            return userEmails.count
+        } else {
+            return self.filteredUserEmails.count
+        }
+        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell()
-        let user = users[indexPath.row]
         
-        cell.textLabel?.text = user.email
+        if tableView == self.tableView {
+            cell.textLabel?.text = userEmails[indexPath.row]
+        } else {
+            cell.textLabel?.text = filteredUserEmails[indexPath.row]
+        }
+        
         return cell
     }
     
