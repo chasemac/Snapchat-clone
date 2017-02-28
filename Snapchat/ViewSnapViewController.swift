@@ -7,8 +7,8 @@
 //
 
 import UIKit
-import SDWebImage
 import Firebase
+import SDWebImage
 
 class ViewSnapViewController: UIViewController {
     

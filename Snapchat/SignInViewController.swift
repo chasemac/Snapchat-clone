@@ -42,7 +42,6 @@ class SignInViewController: UIViewController {
                         
                         self.performSegue(withIdentifier: "signInSegue", sender: nil)
                     }
-
                 })
                 
             } else {
@@ -50,9 +49,7 @@ class SignInViewController: UIViewController {
                 self.performSegue(withIdentifier: "signInSegue", sender: nil)
             }
         })
-        
     }
-    
 }
 
 
